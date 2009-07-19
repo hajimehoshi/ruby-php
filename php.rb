@@ -37,9 +37,9 @@ class ::Object
   def _php_eqeq?(rhs)
     if self.class == rhs.class
       if self.kind_of?(String) and rhs.kind_of?(String) and
-          self.convertable_php_numeric? and rhs.convertable_php_numeric? and
+          self._php_numeric? and rhs._php_numeric? and
           self.strip._ruby_eqeq?(self) and rhs.strip._ruby_eqeq?(rhs)
-        self.to_php_numeric._ruby_eqeq?(rhs.to_php_numeric)
+        self._php_to_f._ruby_eqeq?(rhs._php_to_f)
       elsif self.kind_of?(Float) and rhs.kind_of?(Float) and
           self.nan? and rhs.nan?
         true
@@ -67,9 +67,9 @@ class ::Object
         (self.nan? and rhs._ruby_eqeq?(0)) or
           (self._ruby_eqeq?(0) and rhs.nan?) or
           self.to_f._ruby_eqeq?(rhs.to_f)
-      elsif self.kind_of?(Numeric) and rhs.respond_to?(:to_php_numeric)
-        self.to_php_numeric._ruby_eqeq?(rhs.to_php_numeric)
-      elsif rhs.kind_of?(Numeric) and self.respond_to?(:to_php_numeric)
+      elsif self.kind_of?(Numeric) and rhs.respond_to?(:_php_to_f)
+        self._php_to_f._ruby_eqeq?(rhs._php_to_f)
+      elsif rhs.kind_of?(Numeric) and self.respond_to?(:_php_to_f)
         rhs._php_eqeq?(self)
       else
         self._ruby_eqeq?(rhs)
@@ -101,20 +101,15 @@ class ::String
     !empty? and !_ruby_eqeq?("0")
   end
 
-  def convertable_php_numeric?
+  def _php_numeric?
     !!(self =~ /^\s*(([+-]?((\d+(\.\d+)?)|(\.\d+))(e[+-]?\d+)?)|(0x\d+))\s*$/i)
   end
 
-  def to_php_numeric
-    if convertable_php_numeric?
-      case self
-      when /^\s*0x(\d+)\s*$/i
-        $1.to_i(16)
-      else
-        self.to_f
-      end
+  def _php_to_f
+    if self =~ /^\s*0x(\d+)\s*$/i
+      $1.to_i(16)
     else
-      self.to_f
+      to_f
     end
   end
 
@@ -130,7 +125,7 @@ class ::Numeric
     !_ruby_eqeq?(0)
   end
 
-  def to_php_numeric
+  def _php_to_f
     self
   end
 
@@ -209,31 +204,31 @@ if $0 == __FILE__
                    array("foo" => 1, "bar" => 2, "baz" => 3))
     end
 
-    def test_convertable_php_numeric?
-      assert_equal(false, "".convertable_php_numeric?)
-      assert_equal(false, "foo".convertable_php_numeric?)
-      assert_equal(true, "1".convertable_php_numeric?)
-      assert_equal(true, "0x1".convertable_php_numeric?)
-      assert_equal(true, "0X1".convertable_php_numeric?)
-      assert_equal(true, "1e0".convertable_php_numeric?)
-      assert_equal(true, "1E0".convertable_php_numeric?)
-      assert_equal(true, " 1e0 ".convertable_php_numeric?)
-      assert_equal(true, " 1E0 ".convertable_php_numeric?)
-      assert_equal(true, " +314e-2 ".convertable_php_numeric?)
-      assert_equal(true, " -314e-2 ".convertable_php_numeric?)
-      assert_equal(false, " *314e-2 ".convertable_php_numeric?)
-      assert_equal(false, " 314f-2 ".convertable_php_numeric?)
+    def test__php_numeric?
+      assert_equal(false, ""._php_numeric?)
+      assert_equal(false, "foo"._php_numeric?)
+      assert_equal(true, "1"._php_numeric?)
+      assert_equal(true, "0x1"._php_numeric?)
+      assert_equal(true, "0X1"._php_numeric?)
+      assert_equal(true, "1e0"._php_numeric?)
+      assert_equal(true, "1E0"._php_numeric?)
+      assert_equal(true, " 1e0 "._php_numeric?)
+      assert_equal(true, " 1E0 "._php_numeric?)
+      assert_equal(true, " +314e-2 "._php_numeric?)
+      assert_equal(true, " -314e-2 "._php_numeric?)
+      assert_equal(false, " *314e-2 "._php_numeric?)
+      assert_equal(false, " 314f-2 "._php_numeric?)
 
     end
 
-    def test_to_php_numeric
-      assert_equal(1, "1".to_php_numeric)
-      assert_equal(1, "0x1".to_php_numeric)
-      assert_equal(1, "0X1".to_php_numeric)
-      assert_equal(1.0, "1e0".to_php_numeric)
-      assert_equal(1.0, "1E0".to_php_numeric)
-      assert_equal(1.0, " 1e0 ".to_php_numeric)
-      assert_equal(1.0, " 1E0 ".to_php_numeric)
+    def test__php_to_f
+      assert_equal(1, "1"._php_to_f)
+      assert_equal(1, "0x1"._php_to_f)
+      assert_equal(1, "0X1"._php_to_f)
+      assert_equal(1.0, "1e0"._php_to_f)
+      assert_equal(1.0, "1E0"._php_to_f)
+      assert_equal(1.0, " 1e0 "._php_to_f)
+      assert_equal(1.0, " 1E0 "._php_to_f)
     end
 
     def test_eqeq
