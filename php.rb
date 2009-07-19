@@ -102,11 +102,11 @@ class ::String
   end
 
   def _php_numeric?
-    !!(self =~ /^\s*(([+-]?((\d+(\.\d+)?)|(\.\d+))(e[+-]?\d+)?)|(0x\d+))\s*$/i)
+    !!(self =~ /^\s*(([+-]?((\d+(\.\d+)?)|(\.\d+))(e[+-]?\d+)?)|(0x[0-9a-f]+))\s*$/i)
   end
 
   def _php_to_f
-    if self =~ /^\s*0x(\d+)\s*$/i
+    if self =~ /^\s*0x([0-9a-f]+)\s*$/i
       $1.to_i(16)
     else
       to_f
@@ -256,6 +256,11 @@ if $0 == __FILE__
         end
       end
       assert(-128 != "-0x80")
+    end
+
+    def test_hex
+      assert(255 == "0xff")
+      assert(255 == "0xFF")
     end
 
     def test_space
