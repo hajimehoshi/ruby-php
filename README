@@ -1,10 +1,10 @@
 * What is this
 
-A library to use PHP's == expression in Ruby.
+  A library to use PHP's == operator in Ruby.
 
 * How to use
 
-Add following line to your Ruby script:
+  Add following line to your Ruby script:
 
   require 'php'
 
