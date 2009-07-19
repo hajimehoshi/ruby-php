@@ -102,23 +102,19 @@ class ::String
   end
 
   def convertable_php_numeric?
-    !!(self =~ /^\s*([+-]?((\d+(\.\d+)?)|(\.\d+))(e\d+)?)|(0x\d+)\s*$/i)
+    !!(self =~ /^\s*(([+-]?((\d+(\.\d+)?)|(\.\d+))(e[+-]?\d+)?)|(0x\d+))\s*$/i)
   end
 
   def to_php_numeric
     if convertable_php_numeric?
       case self
-      when /^\s*[+-]?((\d+(\.\d+)?)|(\.\d+))(e\d+)?\s*$/i
-        self.to_f
       when /^\s*0x(\d+)\s*$/i
         $1.to_i(16)
-      when String
-        self.to_f
       else
-        0
+        self.to_f
       end
     else
-      0
+      self.to_f
     end
   end
 
@@ -214,6 +210,8 @@ if $0 == __FILE__
     end
 
     def test_convertable_php_numeric?
+      assert_equal(false, "".convertable_php_numeric?)
+      assert_equal(false, "foo".convertable_php_numeric?)
       assert_equal(true, "1".convertable_php_numeric?)
       assert_equal(true, "0x1".convertable_php_numeric?)
       assert_equal(true, "0X1".convertable_php_numeric?)
@@ -221,6 +219,11 @@ if $0 == __FILE__
       assert_equal(true, "1E0".convertable_php_numeric?)
       assert_equal(true, " 1e0 ".convertable_php_numeric?)
       assert_equal(true, " 1E0 ".convertable_php_numeric?)
+      assert_equal(true, " +314e-2 ".convertable_php_numeric?)
+      assert_equal(true, " -314e-2 ".convertable_php_numeric?)
+      assert_equal(false, " *314e-2 ".convertable_php_numeric?)
+      assert_equal(false, " 314f-2 ".convertable_php_numeric?)
+
     end
 
     def test_to_php_numeric
@@ -388,21 +391,24 @@ if $0 == __FILE__
     def test_nan
       nan = 0.0/0.0
       assert(nan == nan)
+
       assert(nan == "NaN")
       assert(nan == "foo")
       assert(nan == "1")
       assert(nan == 0)
+      assert(nan != 1)
       assert(nan == nil)
       assert(nan == false)
+
       assert("NaN" == nan)
       assert("foo" == nan)
       assert("1" == nan)
       assert(0 == nan)
+      assert(1 != nan)
       assert(nil == nan)
       assert(false == nan)
+
       assert("NaN" != "nan")
-      assert(nan == 0)
-      assert(0 == nan)
     end
 
   end
