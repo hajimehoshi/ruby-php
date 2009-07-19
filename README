@@ -1,0 +1,19 @@
+* What is this
+
+A library to use PHP's == expression in Ruby.
+
+* How to use
+
+Add following line to your Ruby script:
+
+  require 'php'
+
+* Example
+
+  p 42 == '42' # => false
+  require 'php'
+  p 42 == '42' # => true
+
+* Author
+
+  Hajime Hoshi <hajimehoshi@gmail.com>
